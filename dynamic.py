@@ -1,5 +1,4 @@
 import heapq
-import time  
 
 def manhattan(pos1, pos2):
     return abs(pos1[0] - pos2[0]) + abs(pos1[1] - pos2[1])
@@ -41,24 +40,3 @@ def dynamic_weighting_search(n, inicio, meta, obstaculos, epsilon=3):
                 heapq.heappush(open_list, (f, sucesor, depth + 1))
                 came_from[sucesor] = actual
     return None
-# prueba del algoritmo
-
-if __name__ == "__main__":
- 
-
-    n = 5
-    inicio = (0, 0)
-    meta = (4, 4)
-    obstaculos = [(1,1), (2,0), (2,3), (3,1), (4,2)]
-
-    camino = dynamic_weighting_search(n, inicio, meta, obstaculos)
-
-    if camino:
-        print("Camino encontrado:")
-        for i, pos in enumerate(camino):
-            print(f"Paso {i + 1}: la hormiga se mueve a {pos}")
-            time.sleep(0.5) #para simular la animación
-        print(f"\nLongitud total: {len(camino)} pasos")
-    else:
-        print("No se encontró un camino hacia la meta.")
-
