@@ -11,7 +11,9 @@ from PySide6.QtWidgets import (
     QGraphicsScene,
     QSpinBox,
     QVBoxLayout,
+    QHBoxLayout,
     QGraphicsRectItem,
+    QPushButton,
 )
 from PySide6.QtCore import Qt
 from PySide6.QtGui import (
@@ -52,13 +54,41 @@ class GridWidget(QWidget):
         self.view = ZoomableGridView(self.scene)
         self.view.setMinimumSize(600, 400)
 
+        # Boton editar mapa
+        self.editar_mapa = QPushButton("Editar mapa")
+        #self.btn_editar.clicked.connect(self.editar_mapa)
+
+        # Boton iniciar Beam Search
+        self.btn_beam = QPushButton("Iniciar Beam Search")
+        #self.btn_beam.clicked.connect(self.iniciar_beam)
+
+        # Boton iniciar Dynamic Weighting
+        self.btn_dw = QPushButton("Iniciar Dynamic Weighting")
+        #self.btn_dw.clicked.connect(self.iniciar_dw)
+
+        # Panel lateral
+        self.panel = QVBoxLayout()
+        self.panel.addWidget(self.editar_mapa)
+        self.panel.addWidget(self.btn_beam)
+        self.panel.addWidget(self.btn_dw)
+        self.panel.addStretch()
+
+        self.side_widget = QWidget()
+        self.side_widget.setLayout(self.panel)
+        self.side_widget.setFixedWidth(200)
+
+        # Grid + Panel
+        self.main_area = QHBoxLayout()
+        self.main_area.addWidget(self.view)
+        self.main_area.addWidget(self.side_widget)
+
         #self.size_spin = QSpinBox()
         #self.size_spin.setRange(10, 500)
         #self.size_spin.setValue(self.grid_size)
         #self.size_spin.valueChanged.connect(self.set_grid_size)
 
         layout = QVBoxLayout()
-        layout.addWidget(self.view)
+        layout.addLayout(self.main_area)
         self.setLayout(layout)
 
         self.redraw_grid()
