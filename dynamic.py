@@ -13,7 +13,7 @@ def generar_sucesores(posicion, n, obstaculos):
             sucesores.append((nx, ny))
     return sucesores
 
-def dynamic_weighting_search(n, inicio, meta, obstaculos, epsilon=1.5):
+def dynamic_weighting_search(n, inicio, meta, obstaculos, epsilon=3):
     N = n * n 
     open_list = []
     heapq.heappush(open_list, (0, inicio, 0))  
