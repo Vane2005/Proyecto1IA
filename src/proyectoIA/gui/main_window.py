@@ -52,8 +52,14 @@ class GridWidget(QWidget):
         # Tamaño de las celdas
         self.cell_size = 20  # pixeles
 
+        #TODO: Animacion para mostrar los movimientos de la hormiga
+
         # Cargar mapa inicial
         self.rows, self.cols, self.grid_data = load_map()
+
+        # Auxiliar para mostrar movimientos sin perder el mapa original
+        # Modificar para las animaciones
+        self.temp_grid_data = self.grid_data.copy()
 
         self.scene = QGraphicsScene()
         self.view = ZoomableGridView(self.scene)
@@ -106,7 +112,7 @@ class GridWidget(QWidget):
 
         for row in range(self.rows):
             for col in range(self.cols):
-                cell_type = self.grid_data.get((row, col), CellTypes.EMPTY)
+                cell_type = self.temp_grid_data.get((row, col), CellTypes.EMPTY)
                 color = color_map[cell_type]
 
                 rect = QGraphicsRectItem(col * self.cell_size, row * self.cell_size, self.cell_size, self.cell_size)
@@ -116,6 +122,7 @@ class GridWidget(QWidget):
     # Funcion para reiniciar el mapa
     def reiniciar(self):
         self.rows, self.cols, self.grid_data = load_map()
+        self.temp_grid_data = self.grid_data.copy()
         self.redraw_grid()
 
 
