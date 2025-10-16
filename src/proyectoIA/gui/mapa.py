@@ -32,7 +32,7 @@ def load_map():
         with open(filename, 'w') as file:
             file.write("Tamaño(5, 5)\n")
             file.write("Hormiga(1, 1)\n")
-            file.write("Veneno((2,2),(1,3),(4,3),(2,4),(3,5))")
+            file.write("Veneno((2,2),(3,1),(3,4),(4,2),(5,3))")
             file.write("Hongo(5, 5)\n")
 
         return load_map()
@@ -62,8 +62,8 @@ def load_map():
         elif line.startswith("Veneno"):
             coords = re.findall(r'\((\d+),\s*(\d+)\)', line)
             for r, c in coords:
-                row = int(c) - 1
-                col = int(r) - 1
+                row = int(r) - 1
+                col = int(c) - 1
                 grid_data[(row, col)] = CellTypes.OBSTACLE
 
         elif line.startswith("Hongo"):
