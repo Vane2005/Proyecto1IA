@@ -21,6 +21,7 @@ from PySide6.QtGui import (
     QBrush,
 )
 
+# Clase para crear un mapa zoomable
 class ZoomableGridView(QGraphicsView):
     def __init__(self, scene, parent=None):
         super().__init__(scene, parent)
@@ -31,6 +32,7 @@ class ZoomableGridView(QGraphicsView):
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
         self.setDragMode(QGraphicsView.ScrollHandDrag)
 
+    # Zoom con la rueda del mouse
     def wheelEvent(self, event: QWheelEvent):
         zoom_in_factor = 1.25
         zoom_out_factor = 1 / zoom_in_factor
@@ -42,21 +44,20 @@ class ZoomableGridView(QGraphicsView):
 
         self.scale(zoom_factor, zoom_factor)
 
+# Cuerpo principal de la ventana
 class GridWidget(QWidget):
     def __init__(self):
         super().__init__()
 
-        self.cell_size = 20  # pixels
+        # Tamaño de las celdas
+        self.cell_size = 20  # pixeles
 
+        # Cargar mapa inicial
         self.rows, self.cols, self.grid_data = load_map()
 
         self.scene = QGraphicsScene()
         self.view = ZoomableGridView(self.scene)
         self.view.setMinimumSize(600, 400)
-
-        # Boton editar mapa
-        self.editar_mapa = QPushButton("Editar mapa")
-        #self.btn_editar.clicked.connect(self.editar_mapa)
 
         # Boton iniciar Beam Search
         self.btn_beam = QPushButton("Iniciar Beam Search")
@@ -66,11 +67,15 @@ class GridWidget(QWidget):
         self.btn_dw = QPushButton("Iniciar Dynamic Weighting")
         #self.btn_dw.clicked.connect(self.iniciar_dw)
 
+        # Boton resetear mapa
+        self.reiniciar_todo = QPushButton("Reiniciar")
+        self.reiniciar_todo.clicked.connect(self.reiniciar)
+
         # Panel lateral
         self.panel = QVBoxLayout()
-        self.panel.addWidget(self.editar_mapa)
         self.panel.addWidget(self.btn_beam)
         self.panel.addWidget(self.btn_dw)
+        self.panel.addWidget(self.reiniciar_todo)
         self.panel.addStretch()
 
         self.side_widget = QWidget()
@@ -82,20 +87,17 @@ class GridWidget(QWidget):
         self.main_area.addWidget(self.view)
         self.main_area.addWidget(self.side_widget)
 
-        #self.size_spin = QSpinBox()
-        #self.size_spin.setRange(10, 500)
-        #self.size_spin.setValue(self.grid_size)
-        #self.size_spin.valueChanged.connect(self.set_grid_size)
-
         layout = QVBoxLayout()
         layout.addLayout(self.main_area)
         self.setLayout(layout)
 
         self.redraw_grid()
 
+    # Reajusta los limites del mapa
     def set_grid_size(self, size):
-        self.grid_size = size
+        self.rows, self.cols = size
 
+    # Se encarga de actualizar el mapa
     def redraw_grid(self):
         self.scene.clear()
         width = self.cols * self.cell_size
@@ -110,6 +112,11 @@ class GridWidget(QWidget):
                 rect = QGraphicsRectItem(col * self.cell_size, row * self.cell_size, self.cell_size, self.cell_size)
                 rect.setBrush(QBrush(color))
                 self.scene.addItem(rect)
+
+    # Funcion para reiniciar el mapa
+    def reiniciar(self):
+        self.rows, self.cols, self.grid_data = load_map()
+        self.redraw_grid()
 
 
 class MainWindow(QMainWindow):
