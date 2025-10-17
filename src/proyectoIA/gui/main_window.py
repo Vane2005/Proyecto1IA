@@ -19,6 +19,8 @@ from PySide6.QtWidgets import (
     QGraphicsRectItem,
     QPushButton,
     QGraphicsTextItem,
+    QLineEdit,
+    QLabel,
 )
 from PySide6.QtCore import Qt
 from PySide6.QtGui import (
@@ -68,8 +70,11 @@ class GridWidget(QWidget):
         self.ant_item = None
         self.mushroom_item = None
 
+        # Nombre del archivo actual
+        self.nombre_archivo_actual = "mapa.txt"
+
         # Cargar mapa inicial
-        self.rows, self.cols, self.grid_data = load_map()
+        self.rows, self.cols, self.grid_data = load_map(self.nombre_archivo_actual)
 
         # Auxiliar para mostrar movimientos sin perder el mapa original
         # Modificar para las animaciones
@@ -87,7 +92,15 @@ class GridWidget(QWidget):
         self.btn_dw = QPushButton("Iniciar Dynamic Weighting")
         self.btn_dw.clicked.connect(self.iniciar_dw)
 
+        # Campo de texto para nombre de archivo
+        self.label_archivo = QLabel("Nombre del archivo:")
+        self.input_archivo = QLineEdit()
+        self.input_archivo.setPlaceholderText("mapa.txt")
+        self.input_archivo.setText("mapa.txt")
         
+        # Botón para cargar el mapa especificado
+        self.btn_cargar_mapa = QPushButton("Cargar Mapa")
+        self.btn_cargar_mapa.clicked.connect(self.cargar_mapa_especifico)
 
         # Boton resetear mapa
         self.reiniciar_todo = QPushButton("Reiniciar")
@@ -97,6 +110,11 @@ class GridWidget(QWidget):
         self.panel = QVBoxLayout()
         self.panel.addWidget(self.btn_beam)
         self.panel.addWidget(self.btn_dw)
+        self.panel.addSpacing(20)  # Espaciado
+        self.panel.addWidget(self.label_archivo)
+        self.panel.addWidget(self.input_archivo)
+        self.panel.addWidget(self.btn_cargar_mapa)
+        self.panel.addSpacing(10)  # Espaciado
         self.panel.addWidget(self.reiniciar_todo)
         self.panel.addStretch()
 
@@ -162,13 +180,34 @@ class GridWidget(QWidget):
                     self.mushroom_item.setZValue(1)
                     self.scene.addItem(self.mushroom_item)
 
+    def cargar_mapa_especifico(self):
+        """Carga un mapa específico según el nombre ingresado por el usuario"""
+        nombre_archivo = self.input_archivo.text().strip()
+        
+        # Si no tiene extensión, agregar .txt
+        if not nombre_archivo.endswith('.txt'):
+            nombre_archivo += '.txt'
+        
+        try:
+            self.timer_animacion.stop()
+            self.rows, self.cols, self.grid_data = load_map(nombre_archivo)
+            self.nombre_archivo_actual = nombre_archivo
+            self.temp_grid_data = self.grid_data.copy()
+            self.redraw_grid()
+            print(f"Mapa '{nombre_archivo}' cargado exitosamente")
+        except FileNotFoundError:
+            print(f"ERROR: No se encontró el archivo '{nombre_archivo}'")
+            print(f"Asegúrate de que el archivo existe en la carpeta 'txt'")
+        except Exception as e:
+            print(f"ERROR al cargar el mapa: {e}")
+
     # Funcion para reiniciar el mapa
     def reiniciar(self):
         self.timer_animacion.stop()
-        self.rows, self.cols, self.grid_data = load_map()
+        self.rows, self.cols, self.grid_data = load_map(self.nombre_archivo_actual)
         self.temp_grid_data = self.grid_data.copy()
         self.redraw_grid()
-        print("Mapa reiniciado")
+        print(f"Mapa '{self.nombre_archivo_actual}' reiniciado")
 
     def iniciar_beam(self):
         try:

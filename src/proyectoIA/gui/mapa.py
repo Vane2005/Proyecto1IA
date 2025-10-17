@@ -17,10 +17,19 @@ color_map = {
     CellTypes.OBJECTIVE: QColor(0, 200, 0)   # Verde
 }
 
-# Funcion para cargar el mapa a partir de mapa.txt
-def load_map():
+# Funcion para cargar el mapa a partir de un archivo especificado
+def load_map(nombre_archivo="mapa.txt"):
+    """
+    Carga un mapa desde un archivo de texto.
+    
+    Args:
+        nombre_archivo: Nombre del archivo a cargar (por defecto "mapa.txt")
+    
+    Returns:
+        tupla (rows, cols, grid_data)
+    """
     current_dir = os.path.dirname(os.path.abspath(__file__))
-    filename = os.path.join(current_dir, "txt", "mapa.txt")
+    filename = os.path.join(current_dir, "txt", nombre_archivo)
 
     print(f"\n=== CARGANDO MAPA ===")
     print(f"Buscando archivo: {filename}")
@@ -28,23 +37,27 @@ def load_map():
     try:
         with open(filename, 'r', encoding='utf-8') as file:
             lines = file.readlines()
-        print(f"Archivo encontrado. {len(lines)} líneas leídas")
+        print(f"Archivo '{nombre_archivo}' encontrado. {len(lines)} líneas leídas")
 
     except FileNotFoundError:
-        print("Archivo mapa.txt no encontrado. Creando archivo por defecto...")
-        # Crear el directorio txt si no existe
-        txt_dir = os.path.join(current_dir, "txt")
-        os.makedirs(txt_dir, exist_ok=True)
-        
-        # Crea el archivo mapa.txt si no existe
-        with open(filename, 'w', encoding='utf-8') as file:
-            file.write("Tamaño(6,6)\n")
-            file.write("Hormiga(1,1)\n")
-            file.write("Veneno((2,2),(1,3),(4,3),(2,4),(3,5))\n")
-            file.write("Hongo(5,5)\n")
+        if nombre_archivo == "mapa.txt":
+            print("Archivo mapa.txt no encontrado. Creando archivo por defecto...")
+            # Crear el directorio txt si no existe
+            txt_dir = os.path.join(current_dir, "txt")
+            os.makedirs(txt_dir, exist_ok=True)
+            
+            # Crea el archivo mapa.txt si no existe
+            with open(filename, 'w', encoding='utf-8') as file:
+                file.write("Tamaño(6,6)\n")
+                file.write("Hormiga(1,1)\n")
+                file.write("Veneno((2,2),(1,3),(4,3),(2,4),(3,5))\n")
+                file.write("Hongo(5,5)\n")
 
-        print("Archivo creado. Reintentando carga...")
-        return load_map()
+            print("Archivo creado. Reintentando carga...")
+            return load_map(nombre_archivo)
+        else:
+            # Si no es el archivo por defecto, lanzar la excepción
+            raise FileNotFoundError(f"No se encontró el archivo '{nombre_archivo}' en la carpeta txt/")
 
     # Inicializar variables por defecto
     rows = 5
@@ -53,15 +66,12 @@ def load_map():
     
     tamano_encontrado = False
 
-    # Se interpreta el contenido del archivo mapa.txt
+    # Se interpreta el contenido del archivo
     for i, line in enumerate(lines, 1):
         line_original = line
         line = line.strip()
         
-        print(f"\nLínea {i}: '{line_original.rstrip()}'")
-        
         if not line:
-            print("  -> Línea vacía, ignorando")
             continue
 
         if line.startswith("Tamaño") or line.startswith("Tamano"):
@@ -103,13 +113,10 @@ def load_map():
                 print(f"  -> Hongo en posición ({row}, {col})")
             else:
                 print(f"  -> ERROR: No se pudo parsear el hongo")
-        else:
-            print(f"  -> Línea no reconocida")
 
-    # print(f"\n=== RESUMEN ===")
-    # print(f"Tamaño encontrado: {tamano_encontrado}")
-    # print(f"Dimensiones finales: {rows}x{cols}")
-    # print(f"Elementos en el mapa: {len(grid_data)}")
-    # print(f"=================\n")
+    print(f"\n=== MAPA '{nombre_archivo}' CARGADO ===")
+    print(f"Dimensiones: {rows}x{cols}")
+    print(f"Elementos en el mapa: {len(grid_data)}")
+    print(f"================================\n")
 
     return rows, cols, grid_data
