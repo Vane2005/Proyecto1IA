@@ -66,6 +66,7 @@ class GridWidget(QWidget):
         self.velocidad_animacion = 300 
 
         self.ant_item = None
+        self.mushroom_item = None
 
         # Cargar mapa inicial
         self.rows, self.cols, self.grid_data = load_map()
@@ -121,6 +122,7 @@ class GridWidget(QWidget):
     def redraw_grid(self):
         self.scene.clear()
         self.ant_item = None
+        self.mushroom_item = None
         
         width = self.cols * self.cell_size
         height = self.rows * self.cell_size
@@ -146,6 +148,19 @@ class GridWidget(QWidget):
                         row * self.cell_size - self.cell_size * 0.2
                     )
                     self.scene.addItem(self.ant_item)
+                
+                elif cell_type == CellTypes.OBJECTIVE:
+                    self.mushroom_item = QGraphicsTextItem("🍄")
+                    font = QFont()
+                    font.setPointSize(int(self.cell_size * 0.8))
+                    self.mushroom_item.setFont(font)
+                    # Center the emoji in the cell
+                    self.mushroom_item.setPos(
+                        col * self.cell_size + self.cell_size * 0.1,
+                        row * self.cell_size - self.cell_size * 0.2
+                    )
+                    self.mushroom_item.setZValue(1)
+                    self.scene.addItem(self.mushroom_item)
 
     # Funcion para reiniciar el mapa
     def reiniciar(self):
@@ -241,6 +256,7 @@ class GridWidget(QWidget):
                 start_pos[1] * self.cell_size + self.cell_size * 0.1,
                 start_pos[0] * self.cell_size - self.cell_size * 0.2
             )
+            self.ant_item.setZValue(1)
             self.scene.addItem(self.ant_item)
         
         # Iniciar animación
