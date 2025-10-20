@@ -3,7 +3,7 @@ def manhattan(pos1, pos2):
     return abs(pos1[0] - pos2[0]) + abs(pos1[1] - pos2[1])
 
 
-# Aplicación de los operadores (CORREGIDO)
+# Aplicación de los operadores
 def moverArriba(tupla_x_y):
     return (tupla_x_y[0] - 1, tupla_x_y[1])
 
