@@ -32,7 +32,8 @@ def dynamic_weighting_search(n, inicio, meta, obstaculos, epsilon=3):
     g_score = {inicio: 0}
 
     obstaculos_set = set(obstaculos) if not isinstance(obstaculos, set) else obstaculos
-
+    closed_set = set()
+    nodos_explorados = 0;
     while open_list:
         # Extraer el nodo con menor f_score
         f_actual, actual, depth = heapq.heappop(open_list)
