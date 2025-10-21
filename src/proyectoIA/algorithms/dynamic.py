@@ -8,7 +8,7 @@ def generar_sucesores(posicion, n, obstaculos):
     sucesores = []
     for dx, dy in movimientos:
         nx, ny = posicion[0] + dx, posicion[1] + dy
-        if 0 <= nx < n and 0 <= ny < n and (nx, ny) not in obstaculos:
+        if 0 <= nx < n and 0 <= ny < n:
             sucesores.append((nx, ny))
     return sucesores
 
@@ -30,12 +30,9 @@ def dynamic_weighting_search(n, inicio, meta, obstaculos, epsilon=3):
     
     # Diccionario con el costo real desde el inicio
     g_score = {inicio: 0}
-    
-    # Set de nodos ya procesados 
-    closed_set = set()
-    
-    nodos_explorados = 0
-    
+
+    obstaculos_set = set(obstaculos) if not isinstance(obstaculos, set) else obstaculos
+
     while open_list:
         # Extraer el nodo con menor f_score
         f_actual, actual, depth = heapq.heappop(open_list)
@@ -63,14 +60,8 @@ def dynamic_weighting_search(n, inicio, meta, obstaculos, epsilon=3):
         
         # Expandir sucesores
         for sucesor in generar_sucesores(actual, n, obstaculos):
-            # Si ya fue procesado, saltar
-            if sucesor in closed_set:
-                continue
-            
-            # Calcular costo tentativo
-            tentative_g = g_score[actual] + 1
-            
-            # Solo procesar si es un camino nuevo o mejor
+            costo = 3 if sucesor in obstaculos_set else 1
+            tentative_g = g_score[actual] + costo
             if sucesor not in g_score or tentative_g < g_score[sucesor]:
                 # Actualizar información del nodo
                 g_score[sucesor] = tentative_g
@@ -87,7 +78,5 @@ def dynamic_weighting_search(n, inicio, meta, obstaculos, epsilon=3):
                 
                 # Agregar a la cola de prioridad
                 heapq.heappush(open_list, (f, sucesor, depth + 1))
-    
-    # No se encontró camino
-    print(f"No hay camino. Se exploraron {nodos_explorados} nodos")
+                came_from[sucesor] = actual
     return None
