@@ -13,33 +13,70 @@ def generar_sucesores(posicion, n, obstaculos):
     return sucesores
 
 def dynamic_weighting_search(n, inicio, meta, obstaculos, epsilon=3):
-    N = n * n 
+    
+    # Convertir obstaculos a set para búsquedas O(1)
+    if not isinstance(obstaculos, set):
+        obstaculos = set(obstaculos)
+    
+    # N = total de nodos posibles 
+    N = n * n
+    
+    # Cola de prioridad: (f_score, posición, profundidad)
     open_list = []
-    heapq.heappush(open_list, (0, inicio, 0))  
+    heapq.heappush(open_list, (0, inicio, 0))
+    
+    # Diccionario para reconstruir el camino
     came_from = {inicio: None}
+    
+    # Diccionario con el costo real desde el inicio
     g_score = {inicio: 0}
 
     obstaculos_set = set(obstaculos) if not isinstance(obstaculos, set) else obstaculos
 
     while open_list:
+        # Extraer el nodo con menor f_score
         f_actual, actual, depth = heapq.heappop(open_list)
-
+        
+        # Si ya procesamos este nodo, saltar (evita duplicados en el heap)
+        if actual in closed_set:
+            continue
+        
+        closed_set.add(actual)
+        nodos_explorados += 1
+        
         if actual == meta:
+            # Reconstruir el camino
             camino = []
             while actual is not None:
                 camino.append(actual)
                 actual = came_from[actual]
-            return camino[::-1]  
-
+            
+            camino.reverse() 
+            
+            print(f"Camino encontrado en {nodos_explorados} nodos explorados")
+            print(f"Longitud del camino: {len(camino)}")
+            
+            return camino
+        
+        # Expandir sucesores
         for sucesor in generar_sucesores(actual, n, obstaculos):
             costo = 3 if sucesor in obstaculos_set else 1
             tentative_g = g_score[actual] + costo
             if sucesor not in g_score or tentative_g < g_score[sucesor]:
+                # Actualizar información del nodo
                 g_score[sucesor] = tentative_g
+                came_from[sucesor] = actual
+                
+                # Calcular heurística
                 h = manhattan(sucesor, meta)
-               
-                f = tentative_g + h + epsilon * (1 - (depth / N)) * h
-               
+                
+                # FÓRMULA DYNAMIC WEIGHTING:
+                # f = g + h + ε × (1 - depth/N) × h
+                
+                peso_dinamico = epsilon * (1 - (depth / N)) * h
+                f = tentative_g + h + peso_dinamico
+                
+                # Agregar a la cola de prioridad
                 heapq.heappush(open_list, (f, sucesor, depth + 1))
                 came_from[sucesor] = actual
     return None
