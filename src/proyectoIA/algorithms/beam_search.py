@@ -60,7 +60,6 @@ def calcular_beam_width(n, num_obstaculos):
     
     beam_width = int(base * multiplicador)
     
-    # Limitar entre valores razonables
     return max(3, min(beam_width, 10))
 
 
@@ -115,87 +114,73 @@ def reconstruir_camino(closedList, indice_meta):
 
 
 def beam_search(n, inicio, meta, obstaculos):
-    """
-    Implementación del algoritmo Beam Search
     
-    Args:
-        n: tamaño del tablero (n x n)
-        inicio: tupla (x, y) posición inicial
-        meta: tupla (x, y) posición objetivo
-        obstaculos: lista de tuplas con posiciones de obstáculos
+    # Convertir obstáculos a set para búsquedas O(1)
+    obstaculos_set = set(obstaculos) if not isinstance(obstaculos, set) else obstaculos
     
-    Returns:
-        camino: lista de posiciones desde inicio hasta meta
-        None si no se encuentra camino
-    """
-    
-    # Definir el ancho de haz
     beamWidth = calcular_beam_width(n, len(obstaculos))
     
-    # closedList: guarda nodos expandidos
-    # Cada elemento: [posicion, indice_padre, g_n, h_n]
+    # closedList: [posicion, indice_padre, g_n, h_n]
     closedList = []
     
-    # Agregar nodo inicial
+    visitados = set()
+    visitados.add(inicio)
+    
     h_inicial = manhattan(inicio, meta)
     closedList.append([inicio, None, 0, h_inicial])
     
-    # Verificar si ya estamos en la meta
-    if isNodoMeta(meta, inicio):
+    if inicio == meta:
         return [inicio]
     
-    # openList: nodos candidatos para expandir en la siguiente iteración
-    openList = [0]  # Índices de nodos en closedList que están en el beam actual
-    
+    openList = [0]
     iteracion = 0
-    max_iteraciones = n * n * 2  # Límite de seguridad
+    max_iteraciones = n * n * 2
+    
+    # Detección de estancamiento
+    mejor_h_previo = h_inicial
+    iteraciones_sin_mejora = 0
     
     while openList and iteracion < max_iteraciones:
         iteracion += 1
-        
-        # Lista para guardar todos los sucesores de los nodos en el beam
         todos_sucesores = []
         
-        # Expandir cada nodo en el beam actual
+        # Expandir beam actual
         for indice_nodo in openList:
             nodo = closedList[indice_nodo]
-            
-            # Generar sucesores
-            sucesores = expandir_nodo(nodo, meta, obstaculos, n, indice_nodo)
+            sucesores = expandir_nodo(nodo, meta, obstaculos_set, n, indice_nodo)
             
             for sucesor in sucesores:
                 indice_padre, posicion, g_n, h_n, f_n = sucesor
                 
-                # Verificar si encontramos la meta
-                if isNodoMeta(meta, posicion):
-                    # Agregar el nodo meta a closedList
+                if posicion == meta:
                     closedList.append([posicion, indice_padre, g_n, h_n])
-                    indice_meta = len(closedList) - 1
-                    
-                    # Reconstruir y retornar el camino
-                    return reconstruir_camino(closedList, indice_meta)
+                    return reconstruir_camino(closedList, len(closedList) - 1)
                 
-                # Verificar si ya visitamos esta posición
-                ya_visitado = any(n[0] == posicion for n in closedList)
-                
-                if not ya_visitado:
+                if posicion not in visitados:
                     todos_sucesores.append((posicion, indice_padre, g_n, h_n, f_n))
+                    visitados.add(posicion)
         
-        # Si no hay sucesores, no hay camino
         if not todos_sucesores:
             return None
         
-        # Ordenar sucesores por f(n) = g(n) + h(n)
         todos_sucesores.sort(key=lambda x: x[4])
         
-        # Seleccionar los beamWidth mejores nodos (poda)
+        # Seleccionar los w mejores
         mejores_sucesores = todos_sucesores[:beamWidth]
         
-        # Agregar los mejores sucesores a closedList y actualizar openList
+        mejor_h_actual = min(s[3] for s in mejores_sucesores)
+        if mejor_h_actual >= mejor_h_previo:
+            iteraciones_sin_mejora += 1
+            if iteraciones_sin_mejora > beamWidth * 2:
+                return None  # Probablemente no hay camino
+        else:
+            iteraciones_sin_mejora = 0
+            mejor_h_previo = mejor_h_actual
+        
+        # Actualizar openList
         openList = []
         for posicion, indice_padre, g_n, h_n, f_n in mejores_sucesores:
             closedList.append([posicion, indice_padre, g_n, h_n])
             openList.append(len(closedList) - 1)
     
-    # No se encontró camino
     return None
