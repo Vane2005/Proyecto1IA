@@ -8,7 +8,7 @@ def generar_sucesores(posicion, n, obstaculos):
     sucesores = []
     for dx, dy in movimientos:
         nx, ny = posicion[0] + dx, posicion[1] + dy
-        if 0 <= nx < n and 0 <= ny < n and (nx, ny) not in obstaculos:
+        if 0 <= nx < n and 0 <= ny < n:
             sucesores.append((nx, ny))
     return sucesores
 
@@ -18,6 +18,8 @@ def dynamic_weighting_search(n, inicio, meta, obstaculos, epsilon=3):
     heapq.heappush(open_list, (0, inicio, 0))  
     came_from = {inicio: None}
     g_score = {inicio: 0}
+
+    obstaculos_set = set(obstaculos) if not isinstance(obstaculos, set) else obstaculos
 
     while open_list:
         f_actual, actual, depth = heapq.heappop(open_list)
@@ -30,7 +32,8 @@ def dynamic_weighting_search(n, inicio, meta, obstaculos, epsilon=3):
             return camino[::-1]  
 
         for sucesor in generar_sucesores(actual, n, obstaculos):
-            tentative_g = g_score[actual] + 1
+            costo = 3 if sucesor in obstaculos_set else 1
+            tentative_g = g_score[actual] + costo
             if sucesor not in g_score or tentative_g < g_score[sucesor]:
                 g_score[sucesor] = tentative_g
                 h = manhattan(sucesor, meta)

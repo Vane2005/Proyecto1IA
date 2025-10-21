@@ -1,12 +1,12 @@
 # Integrantes
-| | |
+| Nombre | Codigo |
 |-|-|
 | Vanessa Duran Mona | 2359394 |
 | Jesus Estenllos Loaiza | 2313021 |
 | Juan Damian Cuervo | 2359413 |
 | Joan Esteban Villamil | 2380466 |
 
-# Informe de Proyecto
+# Informe de Proyecto 1 - Inteligencia Artificial
 
 ## Introducción
 
@@ -17,6 +17,10 @@ En este informe se detalla el desarrollo del proyecto 1 de la asignatura Intelig
 El repositorio del proyecto es:
 
 [Enlace al repositorio](https://github.com/Vane2005/Proyecto1IA.git)
+
+El proyecto está estructurado en varios archivos Python, cada uno encargado de una parte específica del algoritmo.
+
+Requiere de la libreria `PySide6` como se puede ver en el archivo `requirements.txt`.
 
 ### Beam Search
 
@@ -278,6 +282,8 @@ La implementacion actual utiliza `closedList` y `visitados`, lo que incrementa l
     came_from = {inicio: None}
     g_score = {inicio: 0}
 
+    obstaculos_set = set(obstaculos) if not isinstance(obstaculos, set) else obstaculos
+
     while open_list:
         f_actual, actual, depth = heapq.heappop(open_list)
 
@@ -289,7 +295,8 @@ La implementacion actual utiliza `closedList` y `visitados`, lo que incrementa l
             return camino[::-1]  
 
         for sucesor in generar_sucesores(actual, n, obstaculos):
-            tentative_g = g_score[actual] + 1
+            costo = 3 if sucesor in obstaculos_set else 1
+            tentative_g = g_score[actual] + costo
             if sucesor not in g_score or tentative_g < g_score[sucesor]:
                 g_score[sucesor] = tentative_g
                 h = manhattan(sucesor, meta)
@@ -301,4 +308,32 @@ La implementacion actual utiliza `closedList` y `visitados`, lo que incrementa l
     return None
  ```
 
- 
+La función `dynamic_weighting_search` implementa el algoritmo de Dynamic Weighting, usando las funciones auxiliares definidas anteriormente para generar sucesores y calcular la distancia Manhattan.
+
+En las variables `open_list`, `came_from`, y `g_score`, se gestionan los nodos a explorar, el seguimiento de los nodos padres, y los costos acumulados respectivamente. El algoritmo continúa hasta encontrar la meta o agotar las posibilidades.
+
+La funcion heuristica utilizada es la distancia Manhattan, que es adecuada para este tipo de problemas en una cuadrícula. Esta heurística es admisible debido a que el costo tomado para los `venenos` es 3, asegurando que manhattan siempre subestima el costo real.
+
+Se utiliza la librería `heapq` para manejar la `open_list` como una cola de prioridad, para tener siempre el nodo con el menor costo f en la parte superior.
+
+##### Completitud y Optimalidad
+
+El algoritmo de Dynamic Weighting es completo, ya que explora todos los nodos posibles hasta encontrar la solución, siempre y cuando exista una solución. Sin embargo, no es óptimo debido a la naturaleza del peso dinámico que puede llevar a seleccionar caminos subóptimos.
+
+Esto se debe a que $\epsilon$ ejerce un factor multiplicativo causando lo que en una busqueda $A*$ seria una heurisitica no admisible.
+
+##### Complejidad Temporal y Espacial
+
+###### Complejidad Temporal
+
+Al ser una variante del algoritmo A*, la cantidad de nodos expandidos por ser una cuadricula de tamaño $n \times n$ es $O(n^2)$.
+
+Debido a que cada operación de inserción y extracción en la cola de prioridad (heap) tiene un costo de $O(\log m)$, donde $m$ es el número de nodos en la cola, la complejidad temporal total del algoritmo Dynamic Weighting es $O(n^2 \log n)$.
+
+###### Complejidad Espacial
+
+La complejidad espacial del algoritmo Dynamic Weighting es $O(n^2)$ en el peor de los casos, ya que en el peor escenario se podrían almacenar todos los nodos del tablero en las estructuras de datos `open_list`, `came_from`, y `g_score`.
+
+---
+
+La implementacion no modifica el funcionamiento de Dynamic Weighting.
