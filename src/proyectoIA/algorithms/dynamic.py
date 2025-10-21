@@ -18,7 +18,7 @@ def dynamic_weighting_search(n, inicio, meta, obstaculos, epsilon=3):
     if not isinstance(obstaculos, set):
         obstaculos = set(obstaculos)
     
-    # N = total de nodos posibles (usado para normalizar la profundidad)
+    # N = total de nodos posibles 
     N = n * n
     
     # Cola de prioridad: (f_score, posición, profundidad)
@@ -31,10 +31,9 @@ def dynamic_weighting_search(n, inicio, meta, obstaculos, epsilon=3):
     # Diccionario con el costo real desde el inicio
     g_score = {inicio: 0}
     
-    # Set de nodos ya procesados (optimización importante)
+    # Set de nodos ya procesados 
     closed_set = set()
     
-    # Contador de nodos explorados (para estadísticas)
     nodos_explorados = 0
     
     while open_list:
@@ -45,11 +44,9 @@ def dynamic_weighting_search(n, inicio, meta, obstaculos, epsilon=3):
         if actual in closed_set:
             continue
         
-        # Marcar como procesado
         closed_set.add(actual)
         nodos_explorados += 1
         
-        # ¿Llegamos a la meta?
         if actual == meta:
             # Reconstruir el camino
             camino = []
@@ -57,9 +54,8 @@ def dynamic_weighting_search(n, inicio, meta, obstaculos, epsilon=3):
                 camino.append(actual)
                 actual = came_from[actual]
             
-            camino.reverse()  # Invertir para tener inicio → meta
+            camino.reverse() 
             
-            # Información opcional de depuración
             print(f"Camino encontrado en {nodos_explorados} nodos explorados")
             print(f"Longitud del camino: {len(camino)}")
             
@@ -85,14 +81,6 @@ def dynamic_weighting_search(n, inicio, meta, obstaculos, epsilon=3):
                 
                 # FÓRMULA DYNAMIC WEIGHTING:
                 # f = g + h + ε × (1 - depth/N) × h
-                # 
-                # Componentes:
-                # - g: costo real acumulado
-                # - h: heurística (estimación hasta meta)
-                # - ε × (1 - depth/N) × h: peso dinámico que decrece con profundidad
-                #
-                # Al inicio (depth=0): peso máximo → búsqueda agresiva
-                # Al final (depth≈N): peso≈0 → como A* estándar
                 
                 peso_dinamico = epsilon * (1 - (depth / N)) * h
                 f = tentative_g + h + peso_dinamico
